@@ -102,6 +102,13 @@ Java_java_net_SocketInputStream_socketRead0(JNIEnv *env, jobject this,
     char *bufP;
     jint fd, nread;
 
+
+    if (IS_NULL(env) || IS_NULL(this) || IS_NULL(fdObj) || IS_NULL(data)) {
+        fprintf(stderr, "[Crash] env: %p, this: %p, fdObj: %p, data: %p, off: %d, len: %d, timeout: %d\n",
+                (void *) env, (void *) this, (void *) fdObj, (void *) data, off, len, timeout);
+    }
+
+
     if (IS_NULL(fdObj)) {
         /* shouldn't this be a NullPointerException? -br */
         JNU_ThrowByName(env, JNU_JAVANETPKG "SocketException",

@@ -46,6 +46,26 @@
 JNIEXPORT jobject JNICALL
 Java_java_lang_Throwable_fillInStackTrace(JNIEnv *env, jobject throwable, int dummy)
 {
+    jclass cls = (*env)->GetObjectClass(env, throwable);
+    if (cls != NULL) {
+        jclass classClass = (*env)->FindClass(env, "java/lang/Class");
+        if (classClass != NULL) {
+            jmethodID mid = (*env)->GetMethodID(env, classClass, "getName", "()Ljava/lang/String;");
+            if (mid != NULL) {
+                jstring nameStr = (jstring)(*env)->CallObjectMethod(env, cls, mid);
+                if (nameStr != NULL) {
+                    const char *className = (*env)->GetStringUTFChars(env, nameStr, NULL);
+                    if (className != NULL) {
+                        printf("[Crash] Exception class name: %s\n", className);
+                        (*env)->ReleaseStringUTFChars(env, nameStr, className);
+                    }
+                    (*env)->DeleteLocalRef(env, nameStr);
+                }
+            }
+            (*env)->DeleteLocalRef(env, classClass);
+        }
+        (*env)->DeleteLocalRef(env, cls);
+    }
     JVM_FillInStackTrace(env, throwable);
     return throwable;
 }
